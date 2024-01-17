@@ -1,6 +1,8 @@
 const express = require('express')
 const app = express()
 
+app.use(express.json())
+
 let persons = [
   {
     id: 1,
@@ -45,6 +47,41 @@ app.get('/api/persons/:id', (request, response) => {
     } else {
         response.status(404).end()
     }
+})
+
+const generateId = () => {
+    return Math.floor(Math.random() * 1000000000) + 1
+}
+
+app.post('/api/persons', (request, response) => {
+    const body = request.body
+
+    if (!body.name && !body.number) {
+        return response.status(400).json({
+            error: "name and number must not be blank"
+        })
+    } else if (!body.name) {
+        return response.status(400).json({
+            error: "name must not be blank"
+        })
+    } else if (!body.number) {
+        return response.status(400).json({
+            error: "number must not be blank"
+        })
+    } else if (persons.some(p => p.name.toLowerCase() === body.name.toLowerCase())) {
+        return response.status(400).json({
+            error: "name must be unique"
+        })
+    }
+
+    const newPerson = {
+        id: generateId(),
+        name: body.name,
+        number: body.number,
+    }
+
+    persons = persons.concat(newPerson)
+    response.json(newPerson)
 })
 
 app.delete('/api/persons/:id', (request, response) => {
