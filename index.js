@@ -6,6 +6,7 @@ const app = express()
 app.use(express.json())
 app.use(morgan('tiny'))
 app.use(cors())
+app.use(express.static('dist'))
 
 let persons = [
   {
@@ -34,6 +35,10 @@ const printBody = (request, response, next) => {
     console.log(JSON.stringify(request.body))
     next()
 }
+
+app.get('/', (request, response) => {
+    response.send('<h1>Hiya</h1>')
+})
 
 app.get('/api/persons', (request, response) => {
     response.json(persons)
