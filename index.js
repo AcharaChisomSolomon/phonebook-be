@@ -37,16 +37,19 @@ app.get('/api/persons', (request, response) => {
 })
 
 app.get('/info', (request, response) => {
-    response.send(`
-        <p>Phonebook has info for ${persons.length} people.</p>
-        <p>${new Date().toString()}</p>
-    `)
+    Person.find({}).then(people => {
+        response.send(`
+            <p>Phonebook has info for ${people.length} people.</p>
+            <p>${new Date().toString()}</p>
+        `);
+    })
 })
 
-app.get('/api/persons/:id', (request, response) => {
+app.get('/api/persons/:id', (request, response, next) => {
     Person.findById(request.params.id).then(person => {
         response.json(person)
     })
+    .catch(error => next(error))
 })
 
 app.use(printBody)
@@ -66,10 +69,6 @@ app.post('/api/persons', (request, response) => {
         return response.status(400).json({
             error: "number must not be blank"
         })
-    } else if (persons.some(p => p.name.toLowerCase() === body.name.toLowerCase())) {
-        return response.status(400).json({
-            error: "name must be unique"
-        })
     }
 
     const newPerson = new Person({
@@ -87,6 +86,21 @@ app.delete('/api/persons/:id', (request, response, next) => {
         response.status(204).end()
     })
     .catch(error => next(error))
+})
+
+app.put('/api/persons/:id', (request, response, next) => {
+    const body = request.body
+
+    const personUpdate = {
+        name: body.name,
+        number: body.number,
+    }
+
+    Person.findByIdAndUpdate(request.params.id, personUpdate, { new: true })
+        .then(updatedPerson => {
+            response.json(updatedPerson)
+        })
+        .catch(error => next(error))
 })
 
 app.use(errorHandler)
