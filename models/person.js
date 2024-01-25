@@ -16,12 +16,26 @@ mongoose
     });
 
 const personSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        minLength: 3,
-        required: true
+  name: {
+    type: String,
+    minLength: 3,
+    required: true,
+  },
+  number: {
+    type: String,
+    minLength: 8,
+    validate: {
+      validator: function (val) {
+        const sidesOfVal = val.split("-");
+        return (
+          (sidesOfVal[0].length === 2 || sidesOfVal[0].length === 3) &&
+          !isNaN(sidesOfVal[0]) &&
+          !isNaN(sidesOfVal[1])
+        );
+      },
+      message: "invalid number format"
     },
-    number: String,
+  },
 });
 
 personSchema.set("toJSON", {
